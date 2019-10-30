@@ -1,5 +1,5 @@
 # Smarp API OpenAPI Specification
-[![Build Status](https://travis-ci.com/thienbao92/smarpAPI.svg?branch=master)](https://travis-ci.com/thienbao92/smarpAPI)
+[![Build Status](https://travis-ci.com/thienbao92/redoc-test.svg?branch=master)](https://travis-ci.com/thienbao92/redoc-test)
 ## Steps to finish
 
 1. Enable [Travis](https://docs.travis-ci.com/user/getting-started/#To-get-started-with-Travis-CI%3A) for your repository (**note**: you already have `.travis.yml` file)
@@ -13,9 +13,9 @@
 
 ## Links
 
-- [Reference Documentation (ReDoc)](https://thienbao92.github.io/smarpAPI/)
-- [SwaggerUI](https://thienbao92.github.io/smarpAPI/swagger-ui/)
-- OpenAPI Raw Files: [JSON](https://thienbao92.github.io/smarpAPI/openapi.json) [YAML](https://thienbao92.github.io/smarpAPI/openapi.yaml)
+- [Reference Documentation (ReDoc)](https://thienbao92.github.io/redoc-test/)
+- [SwaggerUI](https://thienbao92.github.io/redoc-test/swagger-ui/)
+- OpenAPI Raw Files: [JSON](https://thienbao92.github.io/redoc-test/openapi.json) [YAML](https://thienbao92.github.io/redoc-test/openapi.yaml)
 
 **Warning:** All above links are updated only after Travis CI finishes deployment
 
