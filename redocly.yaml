@@ -1,0 +1,8 @@
+
+apiTitle: Smarp API
+splitSpec: true
+codeSamples: true
+swaggerUI: true
+travis: true
+repo: thienbao92/smarpAPI
+oasVersion: 3.0.0
