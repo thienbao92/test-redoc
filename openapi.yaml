@@ -40,9 +40,10 @@ servers:
 paths:
   /echo:
     post:
+      x-internal: true
       tags:
         - Echo
-      summary: Echo testtttttttttttttttttttttttt
+      summary: Echo test
       description: Receive the exact message you've sent
       operationId: echo
       security:
