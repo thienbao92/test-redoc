@@ -42,7 +42,6 @@
   "paths": {
     "/echo": {
       "post": {
-        "x-internal": false,
         "tags": [
           "Echo"
         ],
