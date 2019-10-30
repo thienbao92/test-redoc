@@ -40,7 +40,7 @@ servers:
 paths:
   /echo:
     post:
-      x-internal: true
+      x-internal: false
       tags:
         - Echo
       summary: Echo testtttttttttttttttttttttttt
