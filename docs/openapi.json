@@ -1,0 +1,1771 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "description": "# How to generate access-token\nAccess to setting page\n",
+    "version": "1.0.0",
+    "title": "OpenAPI Smarp",
+    "license": {
+      "name": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "x-logo": {
+      "url": "./img/smarp-logo.png"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{subdomain}.smarpshare.com/api",
+      "description": "The production API server",
+      "variables": {
+        "subdomain": {
+          "default": "login",
+          "description": "this value is assigned by the service provider"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "post",
+      "description": "Everything about Post",
+      "x-public": true
+    }
+  ],
+  "paths": {
+    "/post3": {
+      "get": {
+        "x-public": true,
+        "tags": [
+          "post"
+        ],
+        "summary": "Returns all posts from the system visible to the user",
+        "operationId": "getPostList",
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "type of the posts to filter by",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "incoming",
+                "published",
+                "archived",
+                "scheduled",
+                "all",
+                "own",
+                "bookmark"
+              ],
+              "default": "published"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "page number for fetching the next patch of posts, starting from 0.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "number of posts fetched for the page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "channelId",
+            "in": "query",
+            "description": "filter post by channel",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "filter post by search text",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of posts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Post"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CommentAuthor": {
+        "type": "object",
+        "properties": {
+          "avatarUrl": {
+            "type": "string",
+            "description": "Image avatar url"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "avatarUrl",
+          "firstName",
+          "lastName"
+        ]
+      },
+      "CommentContent": {
+        "type": "object",
+        "properties": {
+          "addedAt": {
+            "type": "string",
+            "description": "Date comment was added"
+          },
+          "addedBy": {
+            "type": "string",
+            "description": "Id of the author"
+          },
+          "id": {
+            "type": "string",
+            "description": "Id of the comment"
+          },
+          "text": {
+            "type": "string",
+            "description": "Text content of comment"
+          }
+        },
+        "required": [
+          "addedAt",
+          "addedBy",
+          "id",
+          "text"
+        ]
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "author": {
+            "$ref": "#/components/schemas/CommentAuthor",
+            "description": "Author of comment"
+          },
+          "comment": {
+            "$ref": "#/components/schemas/CommentContent",
+            "description": "Information and content of comment"
+          }
+        },
+        "required": [
+          "author",
+          "comment"
+        ]
+      },
+      "AddComment": {
+        "type": "object",
+        "properties": {
+          "objectId": {
+            "type": "string",
+            "description": "Target of the comment"
+          },
+          "objectType": {
+            "type": "string",
+            "description": "Target type, either post or resource"
+          },
+          "text": {
+            "type": "string",
+            "description": "The text user commented"
+          }
+        },
+        "required": [
+          "objectId",
+          "objectType",
+          "text"
+        ]
+      },
+      "EditComment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of comment to edit"
+          },
+          "text": {
+            "type": "string",
+            "description": "New text"
+          }
+        },
+        "required": [
+          "id",
+          "text"
+        ]
+      },
+      "Channel": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Id of channel"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the channel"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date when the channel was created"
+          },
+          "subscriberCount": {
+            "type": "number",
+            "format": "int32",
+            "description": "Number of subscriber of the channel"
+          },
+          "subscriptionStatus": {
+            "type": "boolean",
+            "description": "Subscription status of the user in the channel"
+          },
+          "createdByDisplay": {
+            "type": "string",
+            "description": "Name of the channel creator",
+            "deprecated": true
+          },
+          "managerList": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "Id of the Channel Manager"
+                },
+                "firstName": {
+                  "type": "string",
+                  "description": "first name of the Channel Manager"
+                },
+                "lastName": {
+                  "type": "string",
+                  "description": "last name of the Channel Manager"
+                }
+              }
+            }
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the channel"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Status of the channel"
+          },
+          "isMandatory": {
+            "type": "boolean",
+            "description": "Channel is mandatory for Company or teams where the user belongs to"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Id of group that channel belongs"
+          },
+          "groupName": {
+            "type": "string",
+            "description": "Name of group that channel belongs"
+          },
+          "isPrivate": {
+            "type": "boolean",
+            "description": "Mark a private Channel. Users who aren't subscibed to a private channel won't be able to retrieve the channel."
+          }
+        }
+      },
+      "ChannelReadPublic": {
+        "type": "object",
+        "required": [
+          "_id",
+          "name",
+          "groupId",
+          "groupName"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Id of the Channel",
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the Channel"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Id of the group to which channel belongs",
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "groupName": {
+            "type": "string",
+            "description": "Name of the group to which channel belongs"
+          }
+        }
+      },
+      "ChannelWrite": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Id of channel"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the channel"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the channel"
+          },
+          "companyId": {
+            "type": "string",
+            "description": "Id of the company to which channel belongs",
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Id of the group to which channel belongs",
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Status of the channel"
+          },
+          "managerList": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "Id of the Channel Manager"
+                },
+                "firstName": {
+                  "type": "string",
+                  "description": "first name of the Channel Manager"
+                },
+                "lastName": {
+                  "type": "string",
+                  "description": "last name of the Channel Manager"
+                }
+              }
+            }
+          },
+          "isPrivate": {
+            "type": "boolean",
+            "description": "Privacy status of the channel"
+          }
+        }
+      },
+      "TeamChannel": {
+        "type": "object",
+        "required": [
+          "_id",
+          "name"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Team": {
+        "type": "object",
+        "required": [
+          "_id",
+          "name",
+          "memberCount",
+          "mandatoryChannelList",
+          "recommendedChannelList"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "memberCount": {
+            "type": "number"
+          },
+          "mandatoryChannelList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamChannel"
+            }
+          },
+          "recommendedChannelList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamChannel"
+            }
+          },
+          "groupName": {
+            "type": "string"
+          }
+        }
+      },
+      "EditTeam": {
+        "type": "object",
+        "required": [
+          "_id",
+          "name",
+          "mandatoryChannelList",
+          "recommendedChannelList",
+          "isLabEnabled"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isLabEnabled": {
+            "type": "boolean"
+          },
+          "mandatoryChannelList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamChannel"
+            }
+          },
+          "recommendedChannelList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamChannel"
+            }
+          }
+        }
+      },
+      "CreateTeam": {
+        "type": "object",
+        "required": [
+          "name",
+          "groupId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "groupId": {
+            "$ref": "#/components/schemas/ObjectId"
+          }
+        }
+      },
+      "AddTeamMember": {
+        "type": "object",
+        "required": [
+          "userIdList"
+        ],
+        "properties": {
+          "userIdList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "RemoveTeamMember": {
+        "type": "object",
+        "required": [
+          "userIdList",
+          "selectAll"
+        ],
+        "properties": {
+          "userIdList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "selectAll": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TeamMember": {
+        "type": "object",
+        "required": [
+          "_id",
+          "firstName",
+          "lastName",
+          "email",
+          "avatarUrl",
+          "socnetList",
+          "role",
+          "point",
+          "lastActive",
+          "teamList",
+          "isMember"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "socnetList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "role": {
+            "type": "string"
+          },
+          "point": {
+            "type": "number"
+          },
+          "lastActive": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "teamList": {
+            "type": "array",
+            "description": "Teams this member belongs to",
+            "items": {
+              "type": "object",
+              "required": [
+                "_id",
+                "name"
+              ],
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "isMember": {
+            "type": "boolean",
+            "description": "Is this member belongs to the retrieved team"
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "required": [
+          "_id",
+          "url",
+          "title",
+          "body",
+          "imageUrl",
+          "createdBy",
+          "createdByDisplay",
+          "createdByType",
+          "createdByAvatar",
+          "updatedBy",
+          "updatedAt",
+          "filteredChannelList",
+          "fullChannelList",
+          "campaignId",
+          "campaignName",
+          "campaignColor",
+          "proposeComment",
+          "socnetSet",
+          "commentEnabled",
+          "commentList",
+          "lang"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Id of the post"
+          },
+          "url": {
+            "type": "string",
+            "description": "Url of the post. Note has empty string as url"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the post"
+          },
+          "body": {
+            "type": "string",
+            "deprecated": true,
+            "description": "Body of the post. DEPRECATED, replaced by `description` and `fullBody`"
+          },
+          "description": {
+            "type": "string",
+            "description": "short description text of the post's body"
+          },
+          "fullBody": {
+            "type": "string",
+            "description": "full post's body text"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "Url of the post's image"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "Post's creator Id"
+          },
+          "createdByDisplay": {
+            "type": "string",
+            "description": "Name of the creator. DEPRECATED due to GDPR"
+          },
+          "createdByType": {
+            "type": "string",
+            "description": "Type of the post's creator, eg.: feed, admin, sharer, etc."
+          },
+          "createdByAvatar": {
+            "type": "string",
+            "description": "Avatar of the post's creator. DEPRECATED due to GDPR"
+          },
+          "updatedBy": {
+            "type": "string",
+            "description": "Id of the last one who edited the post"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the post was last edited"
+          },
+          "companyId": {
+            "type": "string",
+            "description": "Company where the post belongs to"
+          },
+          "order": {
+            "type": "number",
+            "description": "Order of the post. DEPRECATED"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the post will be published"
+          },
+          "archivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the post will be archived"
+          },
+          "tagList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "deprecated": true,
+            "description": "List of tag. DEPRECATED"
+          },
+          "filteredChannelList": {
+            "type": "array",
+            "description": "Channels where the post belongs to, filtered by the caller's subscription. Only includes channels where it has been published",
+            "items": {
+              "$ref": "#/components/schemas/PostChannel"
+            }
+          },
+          "fullChannelList": {
+            "type": "array",
+            "description": "Channels where the post belongs to, unfiltered",
+            "items": {
+              "$ref": "#/components/schemas/PostChannel"
+            }
+          },
+          "userTagList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "deprecated": true,
+            "description": "List of user tag. DEPRECATED"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "Campaign Id of the post"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "Campaign name of the post"
+          },
+          "campaignColor": {
+            "type": "string",
+            "description": "Campaign color of the post"
+          },
+          "duplicated": {
+            "type": "boolean",
+            "description": "DEPRECATED"
+          },
+          "duplicatedList": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "deprecated": true,
+            "description": "DEPRECATED"
+          },
+          "proposeComment": {
+            "type": "string",
+            "description": "Comment of post's proposer"
+          },
+          "socnetSet": {
+            "type": "object",
+            "description": "List of socnet available, unordered. Empty for internal post",
+            "properties": {
+              "facebook": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "linkedin": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "twitter": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "xing": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "wechat": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "generic": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "instagram": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "viadeo": {
+                "$ref": "#/components/schemas/PostSocnet"
+              }
+            }
+          },
+          "socnetList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of socnet available, ordered. Empty for internal post"
+          },
+          "commentEnabled": {
+            "type": "boolean",
+            "description": "whether comment is enabled for the post"
+          },
+          "commentCount": {
+            "type": "number",
+            "description": "number of comments of the post"
+          },
+          "commentList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            },
+            "description": "Comment feed of the post"
+          },
+          "bookmarkId": {
+            "type": "string",
+            "description": "Id of the bookmark made by the caller"
+          },
+          "bookmarkedAt": {
+            "type": "string",
+            "description": "Time when the post was bookmarked"
+          },
+          "isPostInstantPushEnabled": {
+            "type": "boolean",
+            "description": "InstantPush setting of the post"
+          },
+          "reviewedBy": {
+            "type": "string",
+            "description": "For proposed post, Id of the reviewer"
+          },
+          "reviewedAt": {
+            "type": "string",
+            "description": "For proposed post, time when it was reviewed"
+          },
+          "reviewMessage": {
+            "type": "string",
+            "description": "For proposed post, message left by the reviewere, ONLY when the post is rejected."
+          },
+          "reviewedByDisplay": {
+            "type": "string",
+            "description": "For proposed post, Id of the reviewer. DEPRECATED due to GDPR"
+          },
+          "uniqueReadCount": {
+            "type": "number",
+            "description": "number of unique reads of the post"
+          },
+          "shareCount": {
+            "type": "number",
+            "description": "number of shares made from the post"
+          },
+          "clickCount": {
+            "type": "number",
+            "description": "number of clicks generated by shares from the post"
+          },
+          "feedbackList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PostFeedback"
+            },
+            "description": "Feedback feed of the post"
+          },
+          "likeCount": {
+            "type": "number",
+            "description": "Number of users who liked this post"
+          },
+          "isLiked": {
+            "type": "boolean",
+            "description": "True if the user of the current session liked the post"
+          },
+          "lang": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "List of post's languages"
+          }
+        }
+      },
+      "PostSocnet": {
+        "type": "object",
+        "required": [
+          "commentSet",
+          "scheduledShareList",
+          "sharePoint",
+          "shareStatus",
+          "viewCount"
+        ],
+        "properties": {
+          "commentSet": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "suggested comments when share to this network"
+          },
+          "scheduledShareList": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "List of post's scheduled shares made by current session user"
+          },
+          "sharePoint": {
+            "type": "number",
+            "description": "points gained if share to this network"
+          },
+          "shareStatus": {
+            "type": "string",
+            "description": "Status whether user has shared/scheduled share the posts to this network or not",
+            "enum": [
+              "shared",
+              "not shared",
+              "scheduled"
+            ]
+          },
+          "viewCount": {
+            "type": "number",
+            "description": "Clicks generated from shares made from this post to this network"
+          }
+        }
+      },
+      "PostChannel": {
+        "type": "object",
+        "required": [
+          "_id",
+          "name",
+          "groupName",
+          "status"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Id of channel the post belongs to"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of channel"
+          },
+          "groupName": {
+            "type": "string",
+            "description": "Group name where this channel belongs to"
+          },
+          "isManager": {
+            "type": "boolean",
+            "description": "If current session user has management right to publish post for this channel"
+          },
+          "isPrivate": {
+            "type": "boolean",
+            "description": "If this channel is private. A user who aren't subscribed to a private channel won't be able to see it"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "proposed",
+              "published",
+              "archived",
+              "scheduled",
+              "approved",
+              "rejected"
+            ],
+            "description": "Publish status of the post in this channel. Approved and rejected are used only in frontend"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the post will be published"
+          },
+          "archivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the post will be archived"
+          }
+        }
+      },
+      "PostLike": {
+        "type": "object",
+        "required": [
+          "likeCount",
+          "likerList"
+        ],
+        "properties": {
+          "likeCount": {
+            "type": "number",
+            "description": "Total number of people who like a post"
+          },
+          "likerList": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "_id",
+                "name",
+                "avatar"
+              ],
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "avatar": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PostFeedback": {
+        "type": "object",
+        "required": [
+          "addedAt",
+          "addedBy",
+          "avatarUrl",
+          "firstName",
+          "lastName",
+          "message",
+          "role",
+          "_id"
+        ],
+        "properties": {
+          "addedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "addedBy": {
+            "type": "string",
+            "description": "Id of author of the feedback"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "description": "avatar of the author"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "description": "feedback message from admin to the post creator"
+          },
+          "role": {
+            "type": "string",
+            "description": "role of the author"
+          },
+          "_id": {
+            "type": "string",
+            "description": "Id of the feedback"
+          }
+        }
+      },
+      "PostEdit": {
+        "type": "object",
+        "required": [
+          "_id",
+          "title",
+          "body",
+          "url",
+          "imageUrl",
+          "publishedAt",
+          "archivedAt",
+          "fullChannelList",
+          "campaignId",
+          "campaignName",
+          "campaignColor",
+          "socnetSet",
+          "commentEnabled",
+          "isPostInstantPushEnabled",
+          "lang"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Id of the post"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the post"
+          },
+          "body": {
+            "type": "string",
+            "description": "Body of the post."
+          },
+          "url": {
+            "type": "string",
+            "description": "Url of the post."
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "Url of the post's image"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the post will be published"
+          },
+          "archivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the post will be archived"
+          },
+          "fullChannelList": {
+            "type": "array",
+            "description": "Channels where the post belongs to, unfiltered",
+            "items": {
+              "$ref": "#/components/schemas/PostChannel"
+            }
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "Campaign Id of the post"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "Campaign name of the post"
+          },
+          "campaignColor": {
+            "type": "string",
+            "description": "Campaign color of the post"
+          },
+          "socnetSet": {
+            "type": "object",
+            "description": "List of socnet available, unordered. Empty for internal post",
+            "properties": {
+              "facebook": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "linkedin": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "twitter": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "xing": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "wechat": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "generic": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "instagram": {
+                "$ref": "#/components/schemas/PostSocnet"
+              },
+              "viadeo": {
+                "$ref": "#/components/schemas/PostSocnet"
+              }
+            }
+          },
+          "commentEnabled": {
+            "type": "boolean",
+            "description": "whether comment is enabled for the post"
+          },
+          "isPostInstantPushEnabled": {
+            "type": "boolean",
+            "description": "InstantPush setting of the post"
+          },
+          "proposeComment": {
+            "type": "string",
+            "description": "Comment of post's proposer"
+          },
+          "lang": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "List of post's languages"
+          }
+        }
+      },
+      "Group": {
+        "type": "object",
+        "required": [
+          "_id",
+          "name",
+          "createdAt",
+          "memberCount",
+          "seatLimit",
+          "adminList"
+        ],
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId",
+            "description": "Id of the group"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the group"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date when the group was created"
+          },
+          "memberCount": {
+            "type": "number",
+            "format": "int32",
+            "description": "Number of seat taken (= how many members are in the group)"
+          },
+          "seatLimit": {
+            "type": "number",
+            "format": "int32",
+            "description": "Max amount of seats allocated for the group"
+          },
+          "adminList": {
+            "type": "array",
+            "description": "List of group admin",
+            "items": {
+              "type": "object",
+              "required": [
+                "_id",
+                "firstName",
+                "lastName",
+                "email",
+                "avatarUrl"
+              ],
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "Id of the admin"
+                },
+                "firstName": {
+                  "type": "string",
+                  "description": "first name of the admin"
+                },
+                "lastName": {
+                  "type": "string",
+                  "description": "last name of the admin"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "email of the admin"
+                },
+                "avatarUrl": {
+                  "type": "string",
+                  "description": "avatarUrl of the admin"
+                }
+              }
+            }
+          }
+        }
+      },
+      "EditGroup": {
+        "type": "object",
+        "required": [
+          "_id"
+        ],
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId",
+            "description": "Id of the group"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the group"
+          },
+          "seatLimit": {
+            "type": "number",
+            "format": "int32",
+            "description": "Max amount of seats allocated for the group"
+          },
+          "adminList": {
+            "type": "array",
+            "description": "List of group admin",
+            "items": {
+              "type": "object",
+              "required": [
+                "_id"
+              ],
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "Id of the admin"
+                },
+                "firstName": {
+                  "type": "string",
+                  "description": "first name of the admin"
+                },
+                "lastName": {
+                  "type": "string",
+                  "description": "last name of the admin"
+                }
+              }
+            }
+          }
+        }
+      },
+      "NewGroup": {
+        "type": "object",
+        "required": [
+          "seatLimit",
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the group"
+          },
+          "seatLimit": {
+            "type": "number",
+            "format": "int32",
+            "description": "Max amount of seats allocated for the group"
+          }
+        }
+      },
+      "SetDefaultChannels": {
+        "type": "object",
+        "required": [
+          "companyId",
+          "mandatoryChannelList",
+          "recommendedChannelList"
+        ],
+        "properties": {
+          "companyId": {
+            "type": "string",
+            "description": "Id of the Company",
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "mandatoryChannelList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          },
+          "recommendedChannelList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          }
+        }
+      },
+      "GetDefaultChannels": {
+        "type": "object",
+        "required": [
+          "mandatoryChannelList",
+          "recommendedChannelList"
+        ],
+        "properties": {
+          "mandatoryChannelList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelReadPublic"
+            }
+          },
+          "recommendedChannelList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelReadPublic"
+            }
+          }
+        }
+      },
+      "GroupDigestSettings": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Id of the group",
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Subject string of digest emails"
+          },
+          "greeting": {
+            "type": "string",
+            "description": "Greeting string of digest emails"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message string of digest emails"
+          },
+          "emailCronEx": {
+            "type": "string",
+            "description": "Cronex specifying when emails are sent"
+          }
+        }
+      },
+      "Token": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "DeleteToken": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "InvitationPermission": {
+        "type": "object",
+        "required": [
+          "sharerInviteEnabled",
+          "emailDomainList",
+          "selfRegisterEnabled"
+        ],
+        "properties": {
+          "sharerInviteEnabled": {
+            "type": "boolean",
+            "description": "Allow sharer to invite new sharer. Invitation must follow the emailDomainList"
+          },
+          "selfRegisterEnabled": {
+            "type": "boolean",
+            "description": "Allow self-registeration for a new sharer."
+          },
+          "emailDomainList": {
+            "type": "array",
+            "description": "Email domain allowed for self-registered or sharer invitation",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 0,
+            "example": [
+              "smarp.com",
+              "smarpsocial.com"
+            ]
+          }
+        }
+      },
+      "InvitationEmailTemplate": {
+        "type": "object",
+        "required": [
+          "invitationTemplate",
+          "invitationSignature"
+        ],
+        "properties": {
+          "invitationTemplate": {
+            "type": "string",
+            "description": "Email template for sending invitation."
+          },
+          "invitationSignature": {
+            "type": "string",
+            "description": "Signature of email template for sending invitation."
+          }
+        }
+      },
+      "GroupedChannel": {
+        "type": "object",
+        "properties": {
+          "groupId": {
+            "type": "string",
+            "description": "Id of group"
+          },
+          "groupName": {
+            "type": "string",
+            "description": "Name of group"
+          },
+          "channelList": {
+            "type": "object",
+            "description": "List of channels",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "description": "Id of channel"
+              },
+              "name": {
+                "type": "string",
+                "description": "Name of the channel"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Date when the channel was created"
+              },
+              "subscriberCount": {
+                "type": "number",
+                "format": "int32",
+                "description": "Number of subscriber of the channel"
+              },
+              "subscriptionStatus": {
+                "type": "boolean",
+                "description": "Subscription status of the user in the channel"
+              },
+              "createdByDisplay": {
+                "type": "string",
+                "description": "Name of the channel creator",
+                "deprecated": true
+              },
+              "managerList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "description": "Id of the Channel Manager"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "description": "first name of the Channel Manager"
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "description": "last name of the Channel Manager"
+                    }
+                  }
+                }
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the channel"
+              },
+              "isActive": {
+                "type": "boolean",
+                "description": "Status of the channel"
+              },
+              "isMandatory": {
+                "type": "boolean",
+                "description": "Channel is mandatory for Company or teams where the user belongs to"
+              },
+              "isManager": {
+                "type": "boolean",
+                "description": "Check if channel is managed by current session user"
+              },
+              "groupId": {
+                "type": "string",
+                "description": "Id of group that channel belongs"
+              },
+              "groupName": {
+                "type": "string",
+                "description": "Name of group that channel belongs"
+              }
+            }
+          }
+        }
+      },
+      "PostShareTotalBasedOnChannelModel": {
+        "type": "object",
+        "required": [
+          "channelName",
+          "postTotal",
+          "shareTotal",
+          "clickTotal",
+          "reactionTotal",
+          "sharePerPost",
+          "clickAndReactionPerShare"
+        ],
+        "properties": {
+          "channelName": {
+            "type": "string"
+          },
+          "postTotal": {
+            "type": "number"
+          },
+          "shareTotal": {
+            "type": "number"
+          },
+          "clickTotal": {
+            "type": "number"
+          },
+          "reactionTotal": {
+            "type": "number"
+          },
+          "sharePerPost": {
+            "type": "number"
+          },
+          "clickAndReactionPerShare": {
+            "type": "number"
+          }
+        }
+      },
+      "PostShareTotalBasedOnCampaignModel": {
+        "type": "object",
+        "required": [
+          "campaigns",
+          "postTotal",
+          "shareTotal",
+          "clickTotal",
+          "reactionTotal",
+          "sharePerPost",
+          "clickAndReactionPerShare"
+        ],
+        "properties": {
+          "campaigns": {
+            "type": "string"
+          },
+          "postTotal": {
+            "type": "number"
+          },
+          "shareTotal": {
+            "type": "number"
+          },
+          "clickTotal": {
+            "type": "number"
+          },
+          "reactionTotal": {
+            "type": "number"
+          },
+          "sharePerPost": {
+            "type": "number"
+          },
+          "clickAndReactionPerShare": {
+            "type": "number"
+          }
+        }
+      },
+      "UserTeamActivityModel": {
+        "type": "object",
+        "required": [
+          "userTeam",
+          "userCount",
+          "reach",
+          "postsVisible",
+          "shareCount",
+          "clickCount",
+          "reactionCount"
+        ],
+        "properties": {
+          "userTeam": {
+            "type": "string"
+          },
+          "userCount": {
+            "type": "number"
+          },
+          "reach": {
+            "type": "number"
+          },
+          "postsVisible": {
+            "type": "number"
+          },
+          "shareCount": {
+            "type": "number"
+          },
+          "clickCount": {
+            "type": "number"
+          },
+          "reactionCount": {
+            "type": "number"
+          }
+        }
+      },
+      "UserInList": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "companyId": {
+            "type": "string"
+          },
+          "AvatarUrl": {
+            "type": "string"
+          },
+          "point": {
+            "type": "number",
+            "description": "life-time point of the user"
+          },
+          "rewardPoint": {
+            "type": "number",
+            "description": "current point of the user"
+          },
+          "userTagList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "deprecated": true,
+            "description": "List of user tag. DEPRECATED"
+          },
+          "categoryMap": {
+            "type": "string",
+            "deprecated": true,
+            "description": "VERY OLD. SUPER DEPRECATED. List of user tag. It's not a string, just ignore it"
+          },
+          "EmailVerified": {
+            "type": "boolean"
+          },
+          "RoleId": {
+            "type": "string",
+            "deprecated": true,
+            "description": "Id for a role in Permission Model. DEPRECATED"
+          },
+          "RoleName": {
+            "type": "string",
+            "deprecated": true,
+            "description": "Name of a role in Permission Model. DEPRECATED"
+          },
+          "RoleDescription": {
+            "type": "string",
+            "deprecated": true,
+            "description": "Description of a role in Permission Model. DEPRECATED"
+          },
+          "socnetList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "socnet which user has been connected."
+          },
+          "isOwner": {
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Indicator for an online-sale instance owner."
+          },
+          "lastActive": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the user last access Smarp"
+          },
+          "anonymousEnabled": {
+            "type": "boolean"
+          },
+          "teamList": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "groupId": {
+            "type": "string"
+          },
+          "groupName": {
+            "type": "string"
+          }
+        }
+      },
+      "ObjectId": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{24}$"
+      },
+      "Error": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "access-token": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
