@@ -27,8 +27,7 @@
   "tags": [
     {
       "name": "post",
-      "description": "Everything about Post",
-      "x-public": true
+      "description": "Everything about Post"
     }
   ],
   "paths": {
